@@ -1,8 +1,8 @@
-Core async intro
-================
+# Core async intro #
 
-Channels
-========
+
+## Channels ##
+
 
 Go blocks
 =========
