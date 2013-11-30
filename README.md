@@ -1,2 +1,2 @@
-core-async-intro
+Core async intro
 ================
