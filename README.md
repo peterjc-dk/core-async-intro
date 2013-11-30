@@ -6,14 +6,13 @@ Rich Hickeys [blogpost](http://clojure.com/blog/2013/06/28/clojure-core-async-ch
 
 ## Channels ##
 
------------------------------
 
-(defn make-rand-chan []
-  (let [c (chan)]
-    (go (while true
-          (>! c (rand))))
-    c))
------------------------------
+    (defn make-rand-chan []
+      (let [c (chan)]
+        (go (while true
+              (>! c (rand))))
+        c))
+
 
 ## Go blocks ##
 
