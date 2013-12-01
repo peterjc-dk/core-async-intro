@@ -1,13 +1,13 @@
 # Core async intro #
 
-This repo contains a short introduction to clojure's core.async libery, as presented at a Clojure user group meeting in Copenhagen.
+This repo contains a short introduction to clojure's core.async library, as presented at a Clojure user group meeting in Copenhagen.
 
-The introduction of core.async is relative new in cojure though not a new concept in general, and in
- [this blogpost](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html) Rich Hickey motivas and explains it.
+The introduction of core.async is relative new in Clojure though not a new concept in general, and in
+ [this blogpost](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html) Rich Hickey motivates and explains it.
 
-This introduction will only glanse the different concepts since other good introductions already exist. See below for a list of links.
+This introduction will only glance the different concepts since other good introductions already exist. See below for a list of links.
 
-Besides the material published by Hickey and Nolan, I will higly recommend studing the Go language's concurrency concepts, and of course the source of these ideas, like the articles of C. A. R. Hoare.
+Besides the material published by Hickey and Nolan, I will higly recommend studying the Go language's concurrency concepts, and of course the source of these ideas, like the articles of C. A. R. Hoare.
 
 
 ## Channels ##
@@ -17,20 +17,20 @@ Creating and using a channel, by default it is blocking, non buffered.
       (thread (>!! ch "hello"))
       (println (<!! ch)))
 
-This code snippet, creats a chan, puts "hello" in the chan, and block the thread waiting for someone to consume the "hello". the main thread takes the "hello" (will block if the chan is empty), and prints it out.
+This code snippet, creates a chan, puts "hello" in the chan, and block the thread waiting for someone to consume the "hello". the main thread takes the "hello" (will block if the chan is empty), and prints it out.
 
-This way chan's are used to communicate between threads, but also as a syncronization.
+This way chan's are used to communicate between threads, but also as a synchronisation.
 
 
 ## Go blocks ##
-Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weigt threads, cheap to create and posibble to have 100 or 1000 at the same time. The mapping to real thrads is handle under the hood.
+Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weight threads, cheap to create and possible to have 100 or 1000 at the same time. The mapping to real threads is handle under the hood.
 
 
     (let [ch (chan)]
       (go (>! ch "hello"))
       (go (<! ch)))
 
-The go block it self returns a chan containing the result of the encapsulated expresion.
+The go block it self returns a chan containing the result of the encapsulated expression.
 
     (println (<!! (go "go chan")))
 
@@ -47,7 +47,7 @@ When Writing async code some typical ways to structure your code emerges.
 
 This little snippet shows two simple concepts, first a go with a loop inside, waiting for the result to be consumed before continuing the loop. Second all this is wrapped in a function that constructs/setup the go routine, and returning a output chan.
 
-Here a small function constructing a go routine that applies a function and paass it on.
+Here a small function constructing a go routine that applies a function and pass it on.
 
     (defn fn-c [in-c f]
       (let [c (chan)]
@@ -73,11 +73,11 @@ Another function that reads from two chan's and writes to one.
               (let [[v ch] (alts! [in-c1 in-c2])]
                 (>! c v))))))
 
-the Alts let you listen/wait for a result from multible chan's.
+the Alts let you listen/wait for a result from multiple chan's.
 
 
 ## Aggregate ##
-Here a bit more involved example that accumelate the value of wath is read from the in-chan. This illustrate another interesting pattern, namely now our small go routine wrappes state, by using a loop instead of just a while.
+Here a bit more involved example that accumulate the value of what is read from the in-chan. This illustrate another interesting pattern, namely now our small go routine wraps state, by using a loop instead of just a while.
 
     (defn accum-chan [in-c]
       (let [c (chan)]
@@ -89,7 +89,7 @@ Here a bit more involved example that accumelate the value of wath is read from 
                 (recur n-next acc-next))))
         c))
 
-Note that this is a toy example, and implicite asumes that the in-val is a number.
+Note that this is a toy example, and implicit assumes that the in-val is a number.
 
     (defn above-avarage [in-c]
       (let [c (chan)
@@ -102,10 +102,10 @@ Note that this is a toy example, and implicite asumes that the in-val is a numbe
                        :mean mean
                        :over above}))))
         c))
-Here a go routine using the accumelater.
+Here a go routine using the accumulator.
 
 ## Quitting ##
-When putting real things together it is usefull to be able to tell a go routibe to quit, the "recommended" way to do this in the go language is to have quit chan's. This small channel sniffer shows this in done in Clojure.
+When putting real things together it is use full to be able to tell a go routine to quit, the "recommended" way to do this in the go language is to have quit chan's. This small channel sniffer shows this in done in Clojure.
 
 
     (defn sniff-chan
@@ -124,13 +124,13 @@ When putting real things together it is usefull to be able to tell a go routibe 
                   (>! v "sniff stopped")))))
         c))
 
-Also taken from go-lang is the notion that the quitting is done by passing a new channel through the quit-chan, for signaling when shut-down is done.
+Also taken from go-lang is the notion that the quitting is done by passing a new channel through the quit-chan, for signalling when shut-down is done.
 
-Such a go routine is also usefull, test/debug tool when creating real async code.
+Such a go routine is also use full, test/debug tool when creating real async code.
 
-The concept of separating parts of a system and putting channels between them is a very powerfull concept. It makes it natural to create concurrent systems and make the communication data oriented, espesially since what is passed around is (of course) is immutable.
+The concept of separating parts of a system and putting channels between them is a very power full concept. It makes it natural to create concurrent systems and make the communication data oriented. Especially since what is passed around is (of course) is immutable.
 
-Also usefull when integrating async code is a routine that can just consume what is put in a chan.
+Also use full when integrating async code is a routine that can just consume what is put in a chan.
 
     (defn sink-chan
       "consume from a chan and listen to quit chan"
@@ -167,11 +167,14 @@ Finally a example on how things can be wired together.
             (println (<! (go-stop q2)))
             (println "Done!"))))
 
-On one hand it is nice and simple to plug channels together like this in a let block, but I find this quickly grows in complexety as our application does. Espacially if you as I have here also use quit channels.
+On one hand it is nice and simple to plug channels together like this in a let block, but I find this quickly grows in complexity as our application does. Especially if you as I have here also use quit channels.
 
-Im sure it will be possible to cook up a generic way of putting go routines together, and perhaps wrap some error handling, I just havent cracked it yet.
+Im sure it will be possible to cook up a generic way of putting go routines together, and perhaps wrap some error handling, I just haven’t cracked it yet.
 
 This final example also illustrates a important feature, namely timeout channels. The typical way of using these is in a alts! where you then either wait for a channel to have a value for you or the timeout channel to deliver ensuring you don't block reading from a channel forever.
+
+
+
 
 ## Links to articles and talks##
 
