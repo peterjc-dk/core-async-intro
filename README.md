@@ -182,7 +182,7 @@ The concept of separating parts of a system and putting channels between them is
 ## Example code ##
 All the snippets are in this repository "src/async_intro/core.clj"
 
-Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very go way to wrap your head around the concept, the different mindset and play with clojure async syntax.
+Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very good way to wrap your head around the concept, the different mindset and play with clojure async syntax. Properly not high quality async code since it was me trying to learn :)
 
 As a extra little gem I had to play around with [Whisful coding blog's](http://pepijndevos.nl/2013/07/11/dining-philosophers-in-coreasync.html) nice implementation of a algorithm described in the CSP paper [C. A. R. Hoare. Communicating Sequential Processes. (1978)](http://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf)
 
