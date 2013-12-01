@@ -7,7 +7,7 @@ The introduction of core.async is relative new in Clojure though not a new conce
 
 This introduction will only glance the different concepts since other good introductions already exist. See below for a list of links.
 
-Besides the material published by Hickey and Nolan, I will higly recommend studying the Go language's concurrency concepts, and of course the source of these ideas, like the articles of C. A. R. Hoare.
+Besides the material published by Hickey and Nolan, I will higly recommend studying the Go language's concurrency concepts, and of course the source of these ideas, like the articles of C. A. R. Hoare. Links to what I found interesing is also in the list of links.
 
 
 ## Channels ##
