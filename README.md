@@ -191,7 +191,7 @@ As a extra little gem I had to play around with [Whisful coding blog's](http://p
 * [Hickey blogpost](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html)
 * [Hickey Strangeloop talk](http://www.infoq.com/presentations/clojure-core-async)
 * [walkthrough](https://github.com/clojure/core.async/blob/master/examples/walkthrough.clj)
-* [Nolan blogposts](http://swannodette.github.io/)
+* [Nolan blogposts](http://swannodette.github.io/) (A lot of real cool stuff, ClojureScript combined with core.async is a killer feature!)
 * [Nolan talk/demo](http://www.youtube.com/watch?v=AhxcGGeh5ho)
 * [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs)
 * [Go talk 'Concurency is not parallelism'](http://www.youtube.com/watch?v=cN_DpYBzKso)
