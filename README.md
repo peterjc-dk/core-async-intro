@@ -203,6 +203,11 @@ All the snippets are the src file: [core.clj](src/async_intro/core.clj)
 
 Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very good way to wrap your head around the concept, the different mindset and play with clojure async syntax. Properly not high quality async code since it was me trying to learn :)
 
+## Full scale example ##
+To really experiment with using clojure and core.async, I created this maze application.
+
+[The Clojure Async Maze](https://github.com/peterjc-dk/clojure-async-maze)
+
 
 ## Links to articles and talks ##
 
