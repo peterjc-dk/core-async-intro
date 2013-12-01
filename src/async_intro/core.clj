@@ -1,8 +1,6 @@
 (ns async-intro.core
   (:require [clojure.core.async :refer :all]))
 
-(+ 2 3)
-
 (let [ch (chan)]
   (thread (>!! ch "hello"))
   (println (<!! ch)))
@@ -20,9 +18,6 @@
           (>! c (rand))))
     c))
 
-(defn bigger-than? [limit]
-  (fn [x] (< limit x)))
-
 (defn accum-chan [in-c]
   (let [c (chan)]
     (go (loop [n 0 acc 0]
@@ -31,14 +26,6 @@
                 acc-next (+ acc in-val)]
             (>! c [in-val n-next acc-next])
             (recur n-next acc-next))))
-    c))
-
-(defn bigger-than-chan [in-c limit]
-  (let [c (chan)
-        big-pred-lim (bigger-than? limit)]
-    (go (while true
-          (let [val (<! in-c)]
-            (>! c [val (big-pred-lim val)]))))
     c))
 
 (defn above-avarage [in-c]
@@ -81,27 +68,46 @@
   (let [c (chan)]
     (go (loop []
           (let [[v ch] (alts! [quit-chan in-chan])]
-            (cond (= ch in-chan)
-                  (do
-                    (println (str "sniff: " v))
-                    (>! c v)
-                    (recur))
-                  (= ch quit-chan)
-                  (do (println "stopped")
-                      (close! c))))))
+            (condp = ch
+              in-chan
+              (do
+                (println (str "sniff: " v))
+                (>! c v)
+                (recur))
+              quit-chan
+              (>! v "sniff stopped")))))
     c))
 
 (defn sink-chan
   "consume and a chan and listen to quit chan"
   [in-chan quit-chan]
-  (let [c (chan)]
-    (go (loop []
-          (let [[v ch] (alts! [quit-chan in-chan])]
-            (cond (= ch in-chan)
-                  (do
-                    (println (str "sink: " v))
-                    (recur))
-                  (= ch quit-chan)
-                  (do (println "sink stopped")
-                      (close! c))))))
-    c))
+  (go (loop []
+        (let [[v ch] (alts! [quit-chan in-chan])]
+          (condp = ch
+            in-chan
+            (do
+              (println (str "sink: " v))
+              (Thread/sleep 100)
+              (recur))
+            quit-chan
+            (>! v "sink stopped"))))))
+
+(defn go-stop [qc]
+  (go (let [qq (chan)]
+        (>! qc qq)
+        (<! qq))))
+
+(defn do-some-random-stuff []
+  (let [q1 (chan)
+        q2 (chan)
+        input-chan (make-rand-chan)
+        sniffed-chan (sniff-chan input-chan q1)
+        result-chan (above-avarage sniffed-chan)]
+    (sink-chan result-chan q2)
+    (go (<! (timeout 1000))
+        (println "stopping..")
+        (println (<! (go-stop q1)))
+        (println (<! (go-stop q2)))
+        (println "Done!"))))
+
+(do-some-random-stuff)
