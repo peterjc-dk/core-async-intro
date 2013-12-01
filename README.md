@@ -11,17 +11,31 @@ Besides the material published by Hickey and Nolan, I will higly recommend studi
 
 
 ## Channels ##
+Creating and using a channel, by default it is blocking, non buffered.
 
+    (let [ch (chan)]
+      (thread (>!! ch "hello"))
+      (println (<!! ch)))
 
-    (defn make-rand-chan []
-      (let [c (chan)]
-        (go (while true
-              (>! c (rand))))
-        c))
+This code snippet, creats a chan, puts "hello" in the chan, and block the thread waiting for someone to consume the "hello". the main thread takes the "hello" (will block if the chan is empty), and prints it out.
+
+This way chan's are used to communicate between threads, but also as a syncronization.
 
 
 ## Go blocks ##
+Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weigt threads, cheap to create and posibble to have 100 or 1000 at the same time.
 
+
+    (let [ch (chan)]
+      (go (>! ch "hello"))
+      (go (<! ch)))
+
+The go block it self returns a chan containing the result of the encapsulated expresion.
+
+    (println (<!! (go "go chan")))
+
+
+## Go "patterns" ##
 
     (defn make-rand-chan []
       (let [c (chan)]
@@ -30,7 +44,7 @@ Besides the material published by Hickey and Nolan, I will higly recommend studi
         c))
 
 
-## Go "patterns" ##
+
 
 
 ## Filter ##

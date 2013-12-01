@@ -1,6 +1,18 @@
 (ns async-intro.core
   (:require [clojure.core.async :refer :all]))
 
+(+ 2 3)
+
+(let [ch (chan)]
+  (thread (>!! ch "hello"))
+  (println (<!! ch)))
+
+
+(let [ch (chan)]
+  (go (>! ch "hello go"))
+  (go (println (<! ch))))
+
+(println (<!! (go "go chan")))
 
 (defn make-rand-chan []
   (let [c (chan)]
