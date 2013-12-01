@@ -23,7 +23,7 @@ This way chan's are used to communicate between threads, but also as a synchroni
 
 
 ## Go blocks ##
-Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weight threads, cheap to create and possible to have 100 or 1000 at the same time. The mapping to real threads is handle under the hood.
+Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weight threads, cheap to create and it is possible to have 100 or 1000 at the same time. The mapping to real threads/thread pool is handle under the hood.
 
 
     (let [ch (chan)]
@@ -57,6 +57,7 @@ Here a small function constructing a go routine that applies a function and pass
 
 ## Fan in/out ##
 Small function that reads from one chan and write to two.
+
     (defn split-c [in-c]
       (let [c1 (chan)
             c2 (chan)]
@@ -67,13 +68,14 @@ Small function that reads from one chan and write to two.
         [c1 c2]))
 
 Another function that reads from two chan's and writes to one.
+
     (defn merge-c [in-c1 in-c2]
       (let [c (chan)]
         (go (while true
               (let [[v ch] (alts! [in-c1 in-c2])]
                 (>! c v))))))
 
-the Alts let you listen/wait for a result from multiple chan's.
+the Alts let you listen/wait for a result from multiple chan's. By default it will take one at random if more values are available, but it is possible to have them priorities instead.
 
 
 ## Aggregate ##
@@ -102,10 +104,12 @@ Note that this is a toy example, and implicit assumes that the in-val is a numbe
                        :mean mean
                        :over above}))))
         c))
-Here a go routine using the accumulator.
+Here above a go routine that uses the accumulator routine.
+
+
 
 ## Quitting ##
-When putting real things together it is use full to be able to tell a go routine to quit, the "recommended" way to do this in the go language is to have quit chan's. This small channel sniffer shows this in done in Clojure.
+When putting real things together it is use full to be able to tell a go routine to quit, the "recommended" way to do this in the go language is to have quit chan's. This small channel sniffer shows this done in Clojure.
 
 
     (defn sniff-chan
@@ -113,7 +117,7 @@ When putting real things together it is use full to be able to tell a go routine
       [in-chan quit-chan]
       (let [c (chan)]
         (go (loop []
-              (let [[v ch] (alts! [quit-chan in-chan])]
+              (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
                 (condp = ch
                   in-chan
                   (do
@@ -124,11 +128,9 @@ When putting real things together it is use full to be able to tell a go routine
                   (>! v "sniff stopped")))))
         c))
 
-Also taken from go-lang is the notion that the quitting is done by passing a new channel through the quit-chan, for signalling when shut-down is done.
+Also taken from go-lang is the notion that the quitting is done by passing a new channel through the quit-chan, for signalling when shut-down is done. (so yes channels can be put through channels)
 
 Such a go routine is also use full, test/debug tool when creating real async code.
-
-The concept of separating parts of a system and putting channels between them is a very power full concept. It makes it natural to create concurrent systems and make the communication data oriented. Especially since what is passed around is (of course) is immutable.
 
 Also use full when integrating async code is a routine that can just consume what is put in a chan.
 
@@ -136,7 +138,7 @@ Also use full when integrating async code is a routine that can just consume wha
       "consume from a chan and listen to quit chan"
       [in-chan quit-chan]
       (go (loop []
-            (let [[v ch] (alts! [quit-chan in-chan])]
+            (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
               (condp = ch
                 in-chan
                 (do
@@ -167,13 +169,15 @@ Finally a example on how things can be wired together.
             (println (<! (go-stop q2)))
             (println "Done!"))))
 
+## Final thoughs ##
+
 On one hand it is nice and simple to plug channels together like this in a let block, but I find this quickly grows in complexity as our application does. Especially if you as I have here also use quit channels.
 
 Im sure it will be possible to cook up a generic way of putting go routines together, and perhaps wrap some error handling, I just haven’t cracked it yet.
 
 This final example also illustrates a important feature, namely timeout channels. The typical way of using these is in a alts! where you then either wait for a channel to have a value for you or the timeout channel to deliver ensuring you don't block reading from a channel forever.
 
-
+The concept of separating parts of a system and putting channels between them is a very power full concept. It makes it natural to create concurrent systems and make the communication data oriented. Especially since what is passed around is (of course) is immutable.
 
 
 ## Links to articles and talks##

@@ -67,7 +67,7 @@
   [in-chan quit-chan]
   (let [c (chan)]
     (go (loop []
-          (let [[v ch] (alts! [quit-chan in-chan])]
+          (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
             (condp = ch
               in-chan
               (do
@@ -82,7 +82,7 @@
   "consume and a chan and listen to quit chan"
   [in-chan quit-chan]
   (go (loop []
-        (let [[v ch] (alts! [quit-chan in-chan])]
+        (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
           (condp = ch
             in-chan
             (do
