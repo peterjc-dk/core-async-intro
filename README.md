@@ -179,6 +179,12 @@ This final example also illustrates a important feature, namely timeout channels
 
 The concept of separating parts of a system and putting channels between them is a very power full concept. It makes it natural to create concurrent systems and make the communication data oriented. Especially since what is passed around is (of course) is immutable.
 
+## Example code ##
+All the snippets are in this repository "src/async_intro/core.clj"
+
+Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very go way to wrap your head around the concept, the different mindset and play with clojure async syntax.
+
+As a extra little gem I had to play around with [Whisful coding blog's](http://pepijndevos.nl/2013/07/11/dining-philosophers-in-coreasync.html) nice implementation of a algorithm described in the CSP paper [C. A. R. Hoare. Communicating Sequential Processes. (1978)](http://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf)
 
 ## Links to articles and talks##
 
