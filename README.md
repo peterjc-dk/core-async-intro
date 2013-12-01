@@ -14,9 +14,9 @@ Besides the material published by Hickey and Nolan, I will higly recommend study
 Creating and using a channel, by default it is blocking, non buffered.
 
 ```clj
-    (let [ch (chan)]
-      (thread (>!! ch "hello"))
-      (println (<!! ch)))
+(let [ch (chan)]
+  (thread (>!! ch "hello"))
+  (println (<!! ch)))
 ```
 
 This code snippet, creates a chan, puts "hello" in the chan, and block the thread waiting for someone to consume the "hello". the main thread takes the "hello" (will block if the chan is empty), and prints it out.
@@ -28,15 +28,15 @@ This way chan's are used to communicate between threads, but also as a synchroni
 Creating a thread for each sub-task does not scale, to solve this go routine can be used, these are light weight threads, cheap to create and it is possible to have 100 or 1000 at the same time. The mapping to real threads/thread pool is handle under the hood.
 
 ```clj
-    (let [ch (chan)]
-      (go (>! ch "hello"))
-      (go (<! ch)))
+(let [ch (chan)]
+  (go (>! ch "hello"))
+  (go (<! ch)))
 ```
 
 The go block it self returns a chan containing the result of the encapsulated expression.
 
 ```clj
-    (println (<!! (go "go chan")))
+(println (<!! (go "go chan")))
 ```
 
 Note that inside a go routine we use one "!" outside two "!!".
@@ -45,11 +45,11 @@ Note that inside a go routine we use one "!" outside two "!!".
 When Writing async code some typical ways to structure your code emerges.
 
 ```clj
-    (defn make-rand-chan []
-      (let [c (chan)]
-        (go (while true
-              (>! c (rand))))
-        c))
+(defn make-rand-chan []
+  (let [c (chan)]
+    (go (while true
+          (>! c (rand))))
+    c))
 ```
 
 This little snippet shows two simple concepts, first a go with a loop inside, waiting for the result to be consumed before continuing the loop. Second all this is wrapped in a function that constructs/setup the go routine, and returning a output chan.
@@ -57,35 +57,35 @@ This little snippet shows two simple concepts, first a go with a loop inside, wa
 Here a small function constructing a go routine that applies a function and pass it on.
 
 ```clj
-    (defn fn-c [in-c f]
-      (let [c (chan)]
-        (go (while true
-              (>! c (f (<! in-c)))))
-        c))
+(defn fn-c [in-c f]
+  (let [c (chan)]
+    (go (while true
+          (>! c (f (<! in-c)))))
+    c))
 ```
 
 ## Fan in/out ##
 Small function that reads from one chan and write to two.
 
 ```clj
-    (defn split-c [in-c]
-      (let [c1 (chan)
-            c2 (chan)]
-        (go (while true
-              (let [in-val (<! in-c)]
-                (go (>! c1 in-val))
-                (go (>! c2 in-val)))))
-        [c1 c2]))
+(defn split-c [in-c]
+  (let [c1 (chan)
+        c2 (chan)]
+    (go (while true
+          (let [in-val (<! in-c)]
+            (go (>! c1 in-val))
+            (go (>! c2 in-val)))))
+    [c1 c2]))
 ```
 
 Another function that reads from two chan's and writes to one.
 
 ```clj
-    (defn merge-c [in-c1 in-c2]
-      (let [c (chan)]
-        (go (while true
-              (let [[v ch] (alts! [in-c1 in-c2])]
-                (>! c v))))))
+(defn merge-c [in-c1 in-c2]
+  (let [c (chan)]
+    (go (while true
+          (let [[v ch] (alts! [in-c1 in-c2])]
+            (>! c v))))))
 ```
 
 the Alts let you listen/wait for a result from multiple chan's. By default it will take one at random if more values are available, but it is possible to have them priorities instead.
@@ -95,54 +95,52 @@ the Alts let you listen/wait for a result from multiple chan's. By default it wi
 Here a bit more involved example that accumulate the value of what is read from the in-chan. This illustrate another interesting pattern, namely now our small go routine wraps state, by using a loop instead of just a while.
 
 ```clj
-    (defn accum-chan [in-c]
-      (let [c (chan)]
-        (go (loop [n 0 acc 0]
-              (let [in-val (<! in-c)
-                    n-next (inc n)
-                    acc-next (+ acc in-val)]
-                (>! c [in-val n-next acc-next])
-                (recur n-next acc-next))))
-        c))
+(defn accum-chan [in-c]
+  (let [c (chan)]
+    (go (loop [n 0 acc 0]
+          (let [in-val (<! in-c)
+                n-next (inc n)
+                acc-next (+ acc in-val)]
+            (>! c [in-val n-next acc-next])
+            (recur n-next acc-next))))
+    c))
 ```
 Note that this is a toy example, and implicit assumes that the in-val is a number.
 
 ```clj
-    (defn above-avarage [in-c]
-      (let [c (chan)
-            acc-c (accum-chan in-c)]
-        (go (while true
-              (let [[in-val n acc] (<! acc-c)
-                    mean (/ acc n)
-                    above (< mean in-val)]
-                (>! c {:val in-val
-                       :mean mean
-                       :over above}))))
-        c))
+(defn above-avarage [in-c]
+  (let [c (chan)
+        acc-c (accum-chan in-c)]
+    (go (while true
+          (let [[in-val n acc] (<! acc-c)
+                mean (/ acc n)
+                above (< mean in-val)]
+            (>! c {:val in-val
+                   :mean mean
+                   :over above}))))
+    c))
 ```
 Here above a go routine that uses the accumulator routine.
-
-
 
 ## Quitting ##
 When putting real things together it is use full to be able to tell a go routine to quit, the "recommended" way to do this in the go language is to have quit chan's. This small channel sniffer shows this done in Clojure.
 
 ```clj
-    (defn sniff-chan
-      "sniff and forward a chan and listen to quit chan"
-      [in-chan quit-chan]
-      (let [c (chan)]
-        (go (loop []
-              (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
-                (condp = ch
-                  in-chan
-                  (do
-                    (println (str "sniff: " v))
-                    (>! c v)
-                    (recur))
-                  quit-chan
-                  (>! v "sniff stopped")))))
-        c))
+(defn sniff-chan
+  "sniff and forward a chan and listen to quit chan"
+  [in-chan quit-chan]
+  (let [c (chan)]
+    (go (loop []
+          (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
+            (condp = ch
+              in-chan
+              (do
+                (println (str "sniff: " v))
+                (>! c v)
+                (recur))
+              quit-chan
+              (>! v "sniff stopped")))))
+    c))
 ```
 
 Also taken from go-lang is the notion that the quitting is done by passing a new channel through the quit-chan, for signalling when shut-down is done. (so yes channels can be put through channels)
@@ -152,42 +150,42 @@ Such a go routine is also use full, test/debug tool when creating real async cod
 Also use full when integrating async code is a routine that can just consume what is put in a chan.
 
 ```clj
-    (defn sink-chan
-      "consume from a chan and listen to quit chan"
-      [in-chan quit-chan]
-      (go (loop []
-            (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
-              (condp = ch
-                in-chan
-                (do
-                  (println (str "sink: " v))
-                  (Thread/sleep 100)
-                  (recur))
-                quit-chan
-                (>! v "sink stopped"))))))
+(defn sink-chan
+  "consume from a chan and listen to quit chan"
+  [in-chan quit-chan]
+  (go (loop []
+        (let [[v ch] (alts! [quit-chan in-chan] :priority true)]
+          (condp = ch
+            in-chan
+            (do
+              (println (str "sink: " v))
+              (Thread/sleep 100)
+              (recur))
+            quit-chan
+            (>! v "sink stopped"))))))
 ```
 
 ## Putting things together ##
 Finally a example on how things can be wired together.
 
 ```clj
-    (defn go-stop [qc]
-      (go (let [qq (chan)]
-            (>! qc qq)
-            (<! qq))))
+(defn go-stop [qc]
+  (go (let [qq (chan)]
+        (>! qc qq)
+        (<! qq))))
 
-    (defn do-some-random-stuff []
-      (let [q1 (chan)
-            q2 (chan)
-            input-chan (make-rand-chan)
-            sniffed-chan (sniff-chan input-chan q1)
-            result-chan (above-avarage sniffed-chan)]
-        (sink-chan result-chan q2)
-        (go (<! (timeout 1000))
-            (println "stopping..")
-            (println (<! (go-stop q1)))
-            (println (<! (go-stop q2)))
-            (println "Done!"))))
+(defn do-some-random-stuff []
+  (let [q1 (chan)
+        q2 (chan)
+        input-chan (make-rand-chan)
+        sniffed-chan (sniff-chan input-chan q1)
+        result-chan (above-avarage sniffed-chan)]
+    (sink-chan result-chan q2)
+    (go (<! (timeout 1000))
+        (println "stopping..")
+        (println (<! (go-stop q1)))
+        (println (<! (go-stop q2)))
+        (println "Done!"))))
 ```
 
 ## Final thoughs ##
@@ -201,7 +199,7 @@ This final example also illustrates a important feature, namely timeout channels
 The concept of separating parts of a system and putting channels between them is a very power full concept. It makes it natural to create concurrent systems and make the communication data oriented. Especially since what is passed around is (of course) is immutable.
 
 ## Example code ##
-All the snippets are in this repository [core.clj](src/async_intro/core.clj)
+All the snippets are the src file: [core.clj](src/async_intro/core.clj)
 
 Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very good way to wrap your head around the concept, the different mindset and play with clojure async syntax. Properly not high quality async code since it was me trying to learn :)
 
