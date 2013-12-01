@@ -184,9 +184,8 @@ All the snippets are in this repository "src/async_intro/core.clj"
 
 Also included is me folling along and implemeting the examples from Rob Pikes [Go talk 'Go concurrency patterns'](http://www.youtube.com/watch?v=f6kdp27TYZs). This is a very good way to wrap your head around the concept, the different mindset and play with clojure async syntax. Properly not high quality async code since it was me trying to learn :)
 
-As a extra little gem I had to play around with [Whisful coding blog's](http://pepijndevos.nl/2013/07/11/dining-philosophers-in-coreasync.html) nice implementation of a Dinning philosophers algorithm described in the CSP paper [C. A. R. Hoare. Communicating Sequential Processes. (1978)](http://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf)
 
-## Links to articles and talks##
+## Links to articles and talks ##
 
 * [Hickey blogpost](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html)
 * [Hickey Strangeloop talk](http://www.infoq.com/presentations/clojure-core-async)
@@ -197,3 +196,9 @@ As a extra little gem I had to play around with [Whisful coding blog's](http://p
 * [Go talk 'Concurency is not parallelism'](http://www.youtube.com/watch?v=cN_DpYBzKso)
 * [C. A. R. Hoare. Communicating Sequential Processes. (1978)](http://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf)
 * [Go talk 'Let's Go Further: Build Concurrent Software using the Go Programming Language'](http://www.youtube.com/watch?v=4iAiS-qv26Q)
+
+## License ##
+
+Copyright © 2013
+
+Distributed under the Eclipse Public License, the same as Clojure.
