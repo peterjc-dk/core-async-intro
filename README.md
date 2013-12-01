@@ -32,6 +32,7 @@ Besides the material published by Hickey and Nolan, I will higly recommend studi
 
 ## Go "patterns" ##
 
+
 ## Filter ##
 
 
